@@ -23,11 +23,12 @@ public class MovieImage {
     @JoinColumn(name = "file_id")
     private FileInfo fileInfo;
 
-    @Column(nullable = false, length = 2)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ImageType type;
 
     @Builder
-    public MovieImage(Movie movie, FileInfo fileInfo, String type) {
+    public MovieImage(Movie movie, FileInfo fileInfo, ImageType type) {
         this.movie = movie;
         this.fileInfo = fileInfo;
         this.type = type;

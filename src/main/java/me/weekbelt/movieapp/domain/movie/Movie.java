@@ -4,8 +4,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.weekbelt.movieapp.domain.BaseTimeEntity;
+import me.weekbelt.movieapp.domain.MovieGenre.MovieGenre;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @NoArgsConstructor
 @Entity
@@ -13,6 +16,9 @@ public class Movie extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "movie")
+    private List<MovieGenre> movieGenres = new ArrayList<>();
 
     @Column(nullable = false)
     private String title;

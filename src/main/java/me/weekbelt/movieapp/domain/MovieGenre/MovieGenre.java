@@ -8,11 +8,13 @@ import me.weekbelt.movieapp.domain.movie.Movie;
 
 import javax.persistence.*;
 
+
 @Getter @NoArgsConstructor
 @Entity
 public class MovieGenre {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

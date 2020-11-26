@@ -3,5 +3,8 @@ package me.weekbelt.movieapp.domain.genres.repository;
 import me.weekbelt.movieapp.domain.genres.Genre;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface GenreRepository extends JpaRepository<Long, Genre> {
+import java.util.Optional;
+
+public interface GenreRepository extends JpaRepository<Genre, Long> {
+    Optional<Genre> findByName(String name);
 }

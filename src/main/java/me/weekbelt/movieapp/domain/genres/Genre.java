@@ -6,11 +6,13 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+
 @NoArgsConstructor @Getter
 @Entity
 public class Genre {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 10)

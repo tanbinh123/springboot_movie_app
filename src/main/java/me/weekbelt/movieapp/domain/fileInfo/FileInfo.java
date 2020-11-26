@@ -7,11 +7,13 @@ import me.weekbelt.movieapp.domain.BaseTimeEntity;
 
 import javax.persistence.*;
 
+
 @NoArgsConstructor @Getter
 @Entity
 public class FileInfo extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 255)

@@ -9,6 +9,7 @@ import me.weekbelt.movieapp.domain.MovieGenre.MovieGenre;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @NoArgsConstructor
 @Entity
@@ -51,5 +52,9 @@ public class Movie extends BaseTimeEntity {
         this.runtime = runtime;
         this.summary = summary;
         this.description = description;
+    }
+
+    public List<String> getGenreNameList() {
+       return  movieGenres.stream().map(movieGenre -> movieGenre.getGenre().getName()).collect(Collectors.toList());
     }
 }

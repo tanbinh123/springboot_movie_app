@@ -3,20 +3,33 @@ package me.weekbelt.movieapp.domain.movie.service;
 import lombok.RequiredArgsConstructor;
 import me.weekbelt.movieapp.domain.MovieGenre.MovieGenre;
 import me.weekbelt.movieapp.domain.MovieGenre.repository.MovieGenreRepository;
+import me.weekbelt.movieapp.domain.fileInfo.FileInfo;
+import me.weekbelt.movieapp.domain.fileInfo.repository.FileInfoRepository;
 import me.weekbelt.movieapp.domain.genres.Genre;
+import me.weekbelt.movieapp.domain.genres.repository.GenreRepository;
 import me.weekbelt.movieapp.domain.movie.Movie;
+import me.weekbelt.movieapp.domain.movie.MovieDtoFactory;
 import me.weekbelt.movieapp.domain.movie.form.MovieListElement;
+import me.weekbelt.movieapp.domain.movie.form.MovieParam;
+import me.weekbelt.movieapp.domain.movie.form.MovieResponse;
 import me.weekbelt.movieapp.domain.movie.repository.MovieRepository;
 import me.weekbelt.movieapp.domain.movieImage.ImageType;
 import me.weekbelt.movieapp.domain.movieImage.MovieImage;
+import me.weekbelt.movieapp.domain.movieImage.MovieImageDtoFactory;
+import me.weekbelt.movieapp.domain.movieImage.form.MovieImageResponse;
 import me.weekbelt.movieapp.domain.movieImage.repository.MovieImageRepository;
+import me.weekbelt.movieapp.util.FileUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -24,36 +37,85 @@ import java.util.stream.Collectors;
 public class MovieService {
 
     private final MovieRepository movieRepository;
+    private final MovieGenreRepository movieGenreRepository;
+    private final GenreRepository genreRepository;
+    private final FileInfoRepository fileInfoRepository;
     private final MovieImageRepository movieImageRepository;
+    private final FileUtils fileUtils;
 
+    @Transactional(readOnly = true)
     public Page<MovieListElement> findAllMovieListElement(Pageable pageable) {
         Page<Movie> moviePage = movieRepository.findAllMovie(pageable);
         return moviePage.map(movie -> {
-            List<String> genres = getGenresStr(movie);
+            List<String> genres = movie.getGenreNameList();
             MovieImage movieImage = movieImageRepository.findMovieImageByMovieIdAndType(movie.getId(), ImageType.THUMB).get(0);
 
-            return getMovieListElement(movie, genres, movieImage);
+            return MovieDtoFactory.bindToMovieListElement(movie, genres, movieImage);
         });
     }
 
-    private List<String> getGenresStr(Movie movie) {
-        List<MovieGenre> movieGenres = movie.getMovieGenres();
-        return movieGenres.stream().map(movieGenre -> movieGenre.getGenre().getName()).collect(Collectors.toList());
+    public MovieResponse findMovieResponseByMovieId(Long movieId) {
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() ->
+                new IllegalArgumentException("해당하는 영화 정보가 존재하지 않습니다."));
+
+        List<String> genres = movie.getGenreNameList();
+
+        MovieImage movieThumbImage = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.THUMB).get(0);
+        MovieImageResponse movieThumbImageResponse = MovieImageDtoFactory.bindToMovieImageResponse(movieThumbImage);
+
+        List<MovieImage> movieMainImages = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.MAIN);
+        List<MovieImageResponse> movieMainImagesResponse = movieMainImages.stream().map(MovieImageDtoFactory::bindToMovieImageResponse).collect(Collectors.toList());
+
+        return MovieDtoFactory.bindToMovieResponse(movie, genres, movieThumbImageResponse, movieMainImagesResponse);
+
     }
 
-    private MovieListElement getMovieListElement(Movie movie, List<String> genres, MovieImage movieImage) {
-        return MovieListElement.builder()
-                .id(movie.getId())
-                .title(movie.getTitle())
-                .genres(genres)
-                .summary(movie.getSummary())
-                .runtime(movie.getRuntime())
-                .year(movie.getYear())
-                .rating(movie.getRating())
-                .movieImageUrl(movieImage.getFileInfo().getSaveFileName())
-                .createdDateTime(movie.getCreatedDateTime())
-                .modifiedDateTime(movie.getModifiedDateTime())
+    public Long createMovie(MovieParam movieParam) {
+        // Movie 엔티티 생성
+        Movie movie = MovieDtoFactory.bindMovieParamToMovie(movieParam);
+        // Movie 엔티티 저장
+        movieRepository.save(movie);
+
+        // MovieGenre 엔티티 저장
+        movieParam.getGenres().forEach(name -> {
+            Genre genre = genreRepository.findByName(name)
+                    .orElseThrow(() -> new IllegalArgumentException(name + "이라는 장르는 존재하지 않습니다."));
+
+            MovieGenre movieGenre = MovieGenre.builder()
+                    .movie(movie)
+                    .genre(genre)
+                    .build();
+
+            movieGenreRepository.save(movieGenre);
+        });
+
+
+        // 썸네일 FileImage 엔티티 저장
+        FileInfo thumbnailImageFile = fileUtils.saveFileAtStorage(movieParam.getThumbnailImage());
+        fileInfoRepository.save(thumbnailImageFile);
+
+        MovieImage movieThumbImage = MovieImage.builder()
+                .fileInfo(thumbnailImageFile)
+                .movie(movie)
+                .type(ImageType.THUMB)
                 .build();
+        movieImageRepository.save(movieThumbImage);
+
+        // 메인 FileImages 저장
+        MultipartFile[] mainImages = movieParam.getMainImages();
+        Arrays.stream(mainImages).forEach(image -> {
+            FileInfo mainImageFile = fileUtils.saveFileAtStorage(image);
+            fileInfoRepository.save(mainImageFile);
+
+            MovieImage movieMainImage = MovieImage.builder()
+                    .fileInfo(mainImageFile)
+                    .movie(movie)
+                    .type(ImageType.MAIN)
+                    .build();
+            movieImageRepository.save(movieMainImage);
+        });
+
+        return movie.getId();
     }
 
 

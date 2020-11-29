@@ -1,37 +1,39 @@
 package me.weekbelt.movieapp.domain.movie.form;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
+@Builder
+@AllArgsConstructor
 @Getter
 public class MovieParam {
 
     @NotBlank
-    private String title;
+    private final String title;
 
     @NotBlank
-    private String titleEnglish;
+    private final String titleEnglish;
 
-    private List<@NotBlank String> genres;
-
-    @NotBlank
-    private Integer year;
+    private final List<@NotBlank String> genres;
 
     @NotBlank
-    private Double rating;
+    private final Integer year;
 
     @NotBlank
-    private Integer runtime;
+    private final Double rating;
 
     @NotBlank
-    private String summary;
+    private final Integer runtime;
 
-    private String description;
+    @NotBlank
+    private final String summary;
 
-    private MultipartFile thumbnailImage;
+    private final String description;
 
-    private MultipartFile[] mainImages;
+    private final MultipartFile movieImage;
 }

@@ -38,7 +38,7 @@ public class MovieDtoFactory {
     }
 
     public static MovieResponse bindToMovieResponse(Movie movie, List<String> genres,
-                                                    MovieImageResponse thumbnailImage, List<MovieImageResponse> mainImages) {
+                                                    MovieImageResponse movieImageResponse) {
         return MovieResponse.builder()
                 .movieId(movie.getId())
                 .title(movie.getTitle())
@@ -51,8 +51,7 @@ public class MovieDtoFactory {
                 .createdDatetime(movie.getCreatedDateTime())
                 .modifiedDateTime(movie.getCreatedDateTime())
                 .genres(genres)
-                .movieThumbImage(thumbnailImage)
-                .movieMainImages(mainImages)
+                .movieImageResponse(movieImageResponse)
                 .build();
     }
 }

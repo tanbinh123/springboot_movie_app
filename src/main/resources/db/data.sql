@@ -6,3 +6,4 @@ insert into genre(id, name) values (5, '전쟁');
 insert into genre(id, name) values (6, '스포츠');
 insert into genre(id, name) values (7, '뮤지컬');
 insert into genre(id, name) values (8, '멜로');
+insert into genre(id, name) values (9, '범죄');

@@ -63,10 +63,7 @@ public class MovieService {
         MovieImage movieThumbImage = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.THUMB).get(0);
         MovieImageResponse movieThumbImageResponse = MovieImageDtoFactory.bindToMovieImageResponse(movieThumbImage);
 
-        List<MovieImage> movieMainImages = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.MAIN);
-        List<MovieImageResponse> movieMainImagesResponse = movieMainImages.stream().map(MovieImageDtoFactory::bindToMovieImageResponse).collect(Collectors.toList());
-
-        return MovieDtoFactory.bindToMovieResponse(movie, genres, movieThumbImageResponse, movieMainImagesResponse);
+        return MovieDtoFactory.bindToMovieResponse(movie, genres, movieThumbImageResponse);
 
     }
 
@@ -91,29 +88,15 @@ public class MovieService {
 
 
         // 썸네일 FileImage 엔티티 저장
-        FileInfo thumbnailImageFile = fileUtils.saveFileAtStorage(movieParam.getThumbnailImage());
-        fileInfoRepository.save(thumbnailImageFile);
+        FileInfo movieImage = fileUtils.saveFileAtStorage(movieParam.getMovieImage());
+        fileInfoRepository.save(movieImage);
 
         MovieImage movieThumbImage = MovieImage.builder()
-                .fileInfo(thumbnailImageFile)
+                .fileInfo(movieImage)
                 .movie(movie)
                 .type(ImageType.THUMB)
                 .build();
         movieImageRepository.save(movieThumbImage);
-
-        // 메인 FileImages 저장
-        MultipartFile[] mainImages = movieParam.getMainImages();
-        Arrays.stream(mainImages).forEach(image -> {
-            FileInfo mainImageFile = fileUtils.saveFileAtStorage(image);
-            fileInfoRepository.save(mainImageFile);
-
-            MovieImage movieMainImage = MovieImage.builder()
-                    .fileInfo(mainImageFile)
-                    .movie(movie)
-                    .type(ImageType.MAIN)
-                    .build();
-            movieImageRepository.save(movieMainImage);
-        });
 
         return movie.getId();
     }

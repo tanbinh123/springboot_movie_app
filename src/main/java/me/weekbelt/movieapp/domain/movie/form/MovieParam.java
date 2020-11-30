@@ -21,13 +21,10 @@ public class MovieParam {
 
     private final List<@NotBlank String> genres;
 
-    @NotBlank
     private final Integer year;
 
-    @NotBlank
     private final Double rating;
 
-    @NotBlank
     private final Integer runtime;
 
     @NotBlank

@@ -60,10 +60,15 @@ public class MovieService {
 
         List<String> genres = movie.getGenreNameList();
 
-        MovieImage movieThumbImage = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.THUMB).get(0);
-        MovieImageResponse movieThumbImageResponse = MovieImageDtoFactory.bindToMovieImageResponse(movieThumbImage);
+//        MovieImage movieImage = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.THUMB).get(0);
+        List<MovieImage> imageList = movieImageRepository.findMovieImageByMovieIdAndType(movieId, ImageType.THUMB);
+        if (imageList.size() == 0) {
+            return MovieDtoFactory.bindToMovieResponse(movie, genres, null);
+        } else {
+            MovieImageResponse movieImageResponse = MovieImageDtoFactory.bindToMovieImageResponse(imageList.get(0));
+            return MovieDtoFactory.bindToMovieResponse(movie, genres, movieImageResponse);
+        }
 
-        return MovieDtoFactory.bindToMovieResponse(movie, genres, movieThumbImageResponse);
 
     }
 
@@ -88,15 +93,17 @@ public class MovieService {
 
 
         // 썸네일 FileImage 엔티티 저장
-        FileInfo movieImage = fileUtils.saveFileAtStorage(movieParam.getMovieImage());
-        fileInfoRepository.save(movieImage);
+        if (movieParam.getMovieImage() != null) {
+            FileInfo movieImage = fileUtils.saveFileAtStorage(movieParam.getMovieImage());
+            fileInfoRepository.save(movieImage);
 
-        MovieImage movieThumbImage = MovieImage.builder()
-                .fileInfo(movieImage)
-                .movie(movie)
-                .type(ImageType.THUMB)
-                .build();
-        movieImageRepository.save(movieThumbImage);
+            MovieImage movieThumbImage = MovieImage.builder()
+                    .fileInfo(movieImage)
+                    .movie(movie)
+                    .type(ImageType.THUMB)
+                    .build();
+            movieImageRepository.save(movieThumbImage);
+        }
 
         return movie.getId();
     }

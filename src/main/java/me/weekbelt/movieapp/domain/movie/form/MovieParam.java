@@ -32,5 +32,4 @@ public class MovieParam {
 
     private final String description;
 
-    private final MultipartFile movieImage;
 }

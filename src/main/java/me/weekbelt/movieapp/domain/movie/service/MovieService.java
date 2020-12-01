@@ -72,7 +72,7 @@ public class MovieService {
 
     }
 
-    public Long createMovie(MovieParam movieParam) {
+    public Long createMovie(MovieParam movieParam, MultipartFile movieImageMultipartFile) {
         // Movie 엔티티 생성
         Movie movie = MovieDtoFactory.bindMovieParamToMovie(movieParam);
         // Movie 엔티티 저장
@@ -93,16 +93,16 @@ public class MovieService {
 
 
         // 썸네일 FileImage 엔티티 저장
-        if (movieParam.getMovieImage() != null) {
-            FileInfo movieImage = fileUtils.saveFileAtStorage(movieParam.getMovieImage());
-            fileInfoRepository.save(movieImage);
+        if (movieImageMultipartFile != null) {
+            FileInfo movieImageFileInfo = fileUtils.saveFileAtStorage(movieImageMultipartFile);
+            fileInfoRepository.save(movieImageFileInfo);
 
-            MovieImage movieThumbImage = MovieImage.builder()
-                    .fileInfo(movieImage)
+            MovieImage movieImage = MovieImage.builder()
+                    .fileInfo(movieImageFileInfo)
                     .movie(movie)
                     .type(ImageType.THUMB)
                     .build();
-            movieImageRepository.save(movieThumbImage);
+            movieImageRepository.save(movieImage);
         }
 
         return movie.getId();

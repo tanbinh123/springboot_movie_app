@@ -49,7 +49,7 @@ public class FileUtils {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Video Save Error");
+            throw new RuntimeException("File Save Error");
         }
 
     }

@@ -7,6 +7,7 @@ import me.weekbelt.movieapp.domain.movie.service.MovieService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -21,7 +22,7 @@ import java.util.Optional;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-@RequestMapping("/movies")
+@RequestMapping(value = "/movies", produces = MediaTypes.HAL_JSON_VALUE)
 @RestController
 @RequiredArgsConstructor
 public class MovieApiController {
@@ -39,11 +40,10 @@ public class MovieApiController {
     @PostMapping
     public ResponseEntity<?> createMovie(@RequestBody @Valid MovieParam movieParam, @RequestParam(required = false) MultipartFile movieImageMultipartFile) {
         Long saveMovieId = movieService.createMovie(movieParam, movieImageMultipartFile);
+        URI createdUri = linkTo(MovieApiController.class).slash(saveMovieId).toUri();
 
         MovieResponse movieResponse = movieService.findMovieResponseByMovieId(saveMovieId);
-        URI createdUri = linkTo(methodOn(MovieApiController.class).createMovie(movieParam, null)).toUri();
-
-        return ResponseEntity.created(createdUri).build();
+        return ResponseEntity.created(createdUri).body(movieResponse);
     }
 
 }

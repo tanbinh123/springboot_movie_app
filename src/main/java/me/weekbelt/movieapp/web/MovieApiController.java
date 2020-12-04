@@ -38,7 +38,13 @@ public class MovieApiController {
 //    }
 
     @PostMapping
-    public ResponseEntity<?> createMovie(@RequestBody @Valid MovieParam movieParam, @RequestParam(required = false) MultipartFile movieImageMultipartFile) {
+    public ResponseEntity<?> createMovie(@RequestBody @Valid MovieParam movieParam,
+                                         @RequestParam(required = false) MultipartFile movieImageMultipartFile,
+                                         Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
         Long saveMovieId = movieService.createMovie(movieParam, movieImageMultipartFile);
         URI createdUri = linkTo(MovieApiController.class).slash(saveMovieId).toUri();
 

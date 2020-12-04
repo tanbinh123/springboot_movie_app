@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -21,10 +22,13 @@ public class MovieParam {
 
     private final List<@NotBlank String> genres;
 
+    @Min(0)
     private final Integer year;
 
+    @Min(0)
     private final Double rating;
 
+    @Min(0)
     private final Integer runtime;
 
     @NotBlank

@@ -42,7 +42,7 @@ public class MovieApiController {
                                          @RequestParam(required = false) MultipartFile movieImageMultipartFile,
                                          Errors errors) {
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
         
         Long saveMovieId = movieService.createMovie(movieParam, movieImageMultipartFile);

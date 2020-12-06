@@ -1,9 +1,7 @@
 package me.weekbelt.movieapp.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.weekbelt.movieapp.domain.movie.Movie;
 import me.weekbelt.movieapp.domain.movie.form.MovieParam;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +79,7 @@ class MovieApiControllerTest {
 
         MovieParam movieParam = MovieParam.builder()
                 .title("")
-                .titleEnglish("The Godfather")
+                .titleEnglish("")
                 .year(1972)
                 .genres(List.of("범죄"))
                 .rating(9.18)
@@ -101,6 +99,11 @@ class MovieApiControllerTest {
         resultActions
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[0].objectName").exists())
+//                .andExpect(jsonPath("$[0].field").exists())
+                .andExpect(jsonPath("$[0].defaultMessage").exists())
+                .andExpect(jsonPath("$[0].code").exists())
+//                .andExpect(jsonPath("$[0].rejectValue").exists())
         ;
     }
 }

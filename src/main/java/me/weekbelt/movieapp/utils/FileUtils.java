@@ -1,4 +1,4 @@
-package me.weekbelt.movieapp.util;
+package me.weekbelt.movieapp.utils;
 
 import me.weekbelt.movieapp.domain.fileInfo.FileInfo;
 import org.springframework.beans.factory.annotation.Value;

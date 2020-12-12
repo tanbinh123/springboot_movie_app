@@ -8,7 +8,7 @@ import org.springframework.validation.Errors;
 
 import java.io.IOException;
 
-@JsonComponent
+@JsonComponent  // ObjectMapper에 수동으로 추가할 필요 없이 Serializer를 등록
 public class ErrorsSerializer extends JsonSerializer<Errors> {
     @Override
     public void serialize(Errors value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

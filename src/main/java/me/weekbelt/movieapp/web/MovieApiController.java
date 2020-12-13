@@ -4,23 +4,21 @@ import lombok.RequiredArgsConstructor;
 import me.weekbelt.movieapp.domain.movie.form.MovieParam;
 import me.weekbelt.movieapp.domain.movie.form.MovieResponse;
 import me.weekbelt.movieapp.domain.movie.service.MovieService;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RequestMapping(value = "/movies", produces = MediaTypes.HAL_JSON_VALUE)
 @RestController
@@ -44,12 +42,21 @@ public class MovieApiController {
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);
         }
-        
+
         Long saveMovieId = movieService.createMovie(movieParam, movieImageMultipartFile);
-        URI createdUri = linkTo(MovieApiController.class).slash(saveMovieId).toUri();
+
+        WebMvcLinkBuilder webMvcLinkBuilder = linkTo(MovieApiController.class).slash(saveMovieId);
+        URI createdUri = webMvcLinkBuilder.toUri();
+        List<Link> links = Arrays.asList(
+                webMvcLinkBuilder.withSelfRel(),
+                webMvcLinkBuilder.withRel("update-event"),
+                linkTo(MovieApiController.class).withRel("query-events")
+        );
 
         MovieResponse movieResponse = movieService.findMovieResponseByMovieId(saveMovieId);
-        return ResponseEntity.created(createdUri).body(movieResponse);
+
+        EntityModel<MovieResponse> movieResource = EntityModel.of(movieResponse, links);
+        return ResponseEntity.created(createdUri).body(movieResource);
     }
 
 }
